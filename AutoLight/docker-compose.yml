@@ -1,0 +1,49 @@
+
+services:
+  backend:
+    build: ./Backend
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
+
+  frontend:
+    build: ./vite-project
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:5000
+    networks:
+      - app-network
+
+  db:
+    image: supabase/postgres:17.4.1.075
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    networks:
+      - app-network
+
+  supabase:
+    image: supabase/postgres:17.4.1.075
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
